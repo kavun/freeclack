@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>freeclack</title>
+  <style>
+    body {
+      font-family: 'Roboto Slab', serif;
+      background-color:#2d2d2d;
+      color: #d3d0c8;
+      margin: 1em;
+    }
+    .current {
+      background:#515151;
+    }
+    .test {
+      background-color:#2d2d2d;
+      color: #d3d0c8;
+      display: block;
+      width: 100%;
+      height: 69vh;
+      border: 0;
+      font-family: inherit;
+      font-size: 2em;
+    }
+    .results {
+      margin-bottom: 1em;
+      color: #ffcc66;
+    }
+    .wpm, .time {
+      display: inline-block;
+      font-size:4em;
+    }
+  </style>
+</head>
+<body>
+  <div class="results">
+    <div>WPM <div class="wpm">?</div></div>
+    <div>Time <div class="time">0:00</div></div>
+  </div>
+  <textarea class="test"></textarea>
+  
+  <script src="//code.jquery.com/jquery-2.1.1.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment.min.js"></script>
+  <script>
+    var $test = $('.test');
+    $test.focus();
+    var $wpm = $('.wpm');
+    var $time = $('.time');
+    var currIdx = 0;
+    
+    $(document).on('keypress', handleKeys);
+    $(document).on('keydown', handleSpecialKeys);
+    
+    var startTime = {
+      moment: null,
+      date: null
+    };
+    
+    function tryStartTimer(startTime) {
+      if (startTime.moment == null) {
+        startTime.moment = moment();
+        startTime.date = +new Date();
+      }
+    }
+    
+    function formattedElapsed(startMoment) {
+      var nowMoment = moment();
+      return nowMoment.subtract(startMoment).format('m:ss');
+    }
+    
+    function handleKeys(e) {
+      tryStartTimer(startTime);
+      $time.html(formattedElapsed(startTime.moment));
+      $wpm.html(smartWpm(startTime.date));
+    }
+    
+    function milliSoFar(startDate) {
+      return (+new Date()) - startDate;
+    }
+    
+    function smartWpm(startDate) {
+      currIdx++;
+      if (currIdx > 5) {
+        var num = wpm(milliSoFar(startDate), currIdx);
+        var numHTML = num.toFixed(0);
+        return numHTML;
+      }
+      return '?';
+    }
+    
+    function wpm(milliElapsed, charactersTyped){
+      return ((charactersTyped / 5) / (milliElapsed / 60000));
+    }
+    
+    function handleSpecialKeys(e) {
+      if (e.which === 32) {
+        handleKeys(e);
+      }
+      if (e.which === 8) {
+        if (currIdx > 0) {
+          currIdx--;
+        }
+      }
+    }
+  </script>
+  <link href='//fonts.googleapis.com/css?family=Roboto+Slab' rel='stylesheet' type='text/css'>
+</body>
+</html>
